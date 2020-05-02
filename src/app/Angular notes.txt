@@ -1,0 +1,772 @@
+-----------Angular fundamentals
+Component = Data + HTML Template + Logic
+App Component or root Component is parent of all Components in angular App
+Module= Group of related Components which are maintainable
+create a Component -  Register it in a Module - add an element in an HTML markup
+add the Component in app module under declarations of Ng Module.
+Add the component selector in app.component.html to render the component template.
+
+Shortcut to create component from terminal:
+open terminal in vs code: control+`
+type ng g c course
+
+use ` ` for writing multi line code in template of a component
+use *ngFor and *ngIf - these are directives that modify the structure of DOM
+
+In angular we get data from server and to render it we use services.
+we can write the logic in the class of component but it will make the service tightly 
+coupled to the component and if we need to use this service else where in the program 
+then we can't use it. So write services in different class. ex: courses.service.ts 
+
+Dependency injection: Means injecting Dependency of a service into components class constructor. Angular has inbuilt
+Dependency injection mechanism but we need to add the dependency services in providers of app module ts. otherwise it wont work.
+Angular will use singleton pattern and angular create a single instance for the service registered under providers and same instance will be
+given to components calling this service.
+
+Generate services using angular CLI:
+ng g s service_name 
+
+@component decorator internally includes @Injetcable decorator.
+
+----------------------------------------------------------------------
+
+----------------Displaying data and handling events
+
+property binding:
+Binding html dom with values in components. direction of property binding is from component to view only. not Two way.
+<h2>{{title}}</h2> = string interpolaton
+<h2 [textContent]="title"></h2> = square brackets 
+Above both will give same result.
+
+Attribute Binding:
+DOM vs HTML: HTML has some properties but DOM dont have them and vice-versa.
+DOM allows us to create html cotent dynamically. 
+If you are binding to a attribute which is not listed in dom, we use attr. notation.
+EX: <td [attr.colspan]="colSpan"></td>
+
+Adding bootstrap:
+npm install bootstrap --save 
+
+class binding:
+<button class="btn btn-primary" [class.active]="isActive">Save</button>
+Above is class binding, isActive is a field in class and based on its value the active class is binded to the button.
+
+style binding:
+search DOM style object w3 schools gives all properties available in style object
+<button [style.backgroundColor]="isActive" ? 'Blue' : 'Red'>Save</button>
+
+Event handling:
+Event bubbling happens for dom elements in html tree by default.
+in template:
+<div (click)="onDivClicked()">
+    <button (click)="onSave($event)">Save</button>
+</div>
+Define methods in Component class as:
+onDivClicked(){
+    console.log("Div clicked");
+}
+onSave($event){
+    $event.stopPropagation(); //to stop event bubbling
+    console.log("Button clicked",$event); //here $event is default angular attribute thatgives the details of mouse handler
+}
+
+
+Event filtering:
+in template:
+<input (keyup.enter)="onKeyUp()"/> //cleaner code.
+in component class:
+onKeyUp()
+{
+    console.log("enter pressed");
+}
+
+Two way binding:
+add import { FormsModule } from '@angular/forms' in app.module.ts and add it in imports there
+  way 1:  <input [value]="myemail" (keyup.enter)="myemail = $event.target.value; onKeyUptwowaybinding()"/>
+  way 2:  <input [(ngModel)]="myemail" (keyup.enter)="onKeyUptwowaybinding()"/> //Banana in box binding [()]
+
+
+Pipes:
+Built in pipes: Uppercase, Lowercase, Decimal, currency, percent
+
+Custom pipes:
+we can build custom pipes just like we built components and services
+create summary.pipe.ts - summary pipe(custom user defined) and implement
+the PipeTransform interface with matching syntax of transform function. Write code in it and execute.
+Import Pipe and PipeTransform from angular core and write Pipe decorator with pipe name. (here its summary)
+Register this Pipe under declarations in app module ts.
+
+------------------------------------------------------------------
+
+Building re usable components-----
+
+ComponentAPI:
+    input properties(to pass state or input to the component) ->{COMPONENT} -> Output properties(to rise events) ; Whole together called component api.
+    <favourite [isFavourite]="post.isFav (change)="onChange()"></favourite>
+    in above line [isFavourite] is input property AND (change) is output propertys
+
+Input properties:
+Declare @Input as aliasing before the properties that are going to be inputs inside the component class
+also import Input decorator function from angular core in the component.
+
+alisaing input properties:
+@Input('is-favourite') isFavourite: boolean;
+<favourite [is-favourite]="post.favourite"></favourite> ==True  (Aliasing inpit)
+<favourite [isFavouite]="post.favourite"></favourite> ==True  (Non aliasing input)
+
+Output parameters:
+Similar to input parameters. Declar using @Output() and create a new EventEmitter object to the declared function.
+Add Output and EventEmitter decorators in import statement of the component.
+Ex: favourite component: @Output() change = new EventEmitter();  -- change event which is a output parameter
+in html of app component: <favourite [isFavourite]="post.isFav (change)="onChange()">
+the above statement binds the event onChange to the html dom using the output parameter change.
+the function in the class:
+onClick(){
+    this.isFavouite=!this.isFavouite;
+    this.change.emit(); //key statement of emitting event as output.
+}
+in app component ts:
+onChange()
+{
+    console.log("fav changed");
+}
+
+Passing event data:
+this.change.emit(this.isFavouite); //passing data in onClick() in Favorite ts
+onChange(isFavourite)
+{
+    console.log("Fav changed", isFavourite);
+}
+in html of app component: <favourite [isFavourite]="post.isFav (change)="onChange($event)">  //use $event, a built in standard dom event object
+..passing object..
+this.change.emit({newValue: this.isFavourite}); //passing an object
+in app component ts:
+interface FavoriteChangedEventArgs{ //interface of objects coming under the object from favorite class
+    newValue: boolean;
+}
+onChange(eventArgs: FavoriteChangedEventArgs)
+{
+    console.log("Fav changed", eventArgs);
+}
+or
+you can export that export that interface from Favorite component and import it to app component.
+
+alisaing output properties:
+@Output('change') click=new EventEmitter(); //change is alias for click here.
+
+
+
+Templates:
+Either use template url or use template inline. not both in a component. `` for multiline html elements in a template.
+
+Styles:
+styleUrls in component metadata.
+styles: [``] //inline styles in the component meta data.
+or using <styles></styles> tag in html page. These styles in whatever way we apply
+will not leak outside the component and its scope lies with in the underlying component.
+
+View Encapsulation:
+Shadow DOM- Allows us to apply SCOPED STYLES to elements without bleeding out to the
+outer world.'
+In JS:
+var el = document.querySelector('favorite');
+el.innerHTML=`
+    <style>h1 {color : red} </h1>
+    <h1>Hello</h1>
+    `;
+The above lines in JS will lead to style leakage, means apart from element e
+if the page has other h1 elements the red color will be applied to them as well.
+The above can be eliminated in angular using shadow dom concpet:
+var el = document.querySelector('favorite');
+var root=el.createShadowRoot(); //shadowdom
+root.innerHTML=`
+    <style>h1 {color : red} </h1>
+    <h1>Hello</h1>
+    `;
+
+To enable shadowdom, and stop the leakage of styles add:
+ViewEncapsulation in import statement of the component and add
+encapsulation : ViewEncapsulation.Emulated 
+statement in the metadata of Component. The above is an enum and it enables the shadow dom.
+(apart from emulated we have Native and None other two values for enum which are rarely used. None means allow leakage. Native
+works only in high end browsers.)
+
+ngContent:
+Shortcut to create divs in html:
+div.panel.panel-default>div.panel-heading+div.panel-body and press TAB
+creates this markup-
+<div class="panel panel-default">
+    <div class="panel-heading"></div>
+    <div class="panel-body"></div>
+</div>
+<ng-content></ng-content> -> provides runtime html custom content or re usable components
+If you are building reusable components like a bootstrap panel and you want consumer of this to provide custom content use ng-content element.
+You dont need a selector if you have only one ng-content.
+The ng content replaces the class which has ng contents selector class like example:
+<ng-content selector=".heading"></ng-content> //in bootstrap component html created
+and in app component
+<div class="heading">Heading</div> 
+here Heading will be copied in to ng content with heading as a selctor
+
+Use <ng-container> in place of <div> in app component to remove any additional markup around the element.
+Like: <ng-container class="heading">Heading</ng-container> instead of 
+<div class="heading">Heading</div>
+This renders only "Heading"  in the dom.
+
+----------------------------------------------------------------------------------------
+
+Directives-----
+
+Structural directives: Modify the structure of DOM
+Attribute Directives: Modify the attributes of DOM elements
+
+Using Structural directives - prefix with *
+<div *ngIf="couses.length > 0">
+    List of courses
+</div>
+The above will dispaly the div if the condition is true.
+
+If and else approach (ngIf): (here noCouses is id of ng-template)
+<div *ngIf="couses.length > 0; else noCouses">
+    List of courses
+</div>
+<ng-template #noCouses >
+ No courses
+ </ng-template>
+
+Alternate approach:
+<div *ngIf="couses.length > 0; then coursesList else noCouses"></div>
+<ng-template #coursesList>
+    List of courses
+</ng-template>
+<ng-template #noCouses >
+ No courses
+ </ng-template>
+
+ Hidden Property:
+ <div hidden>
+    List of courses
+</div> //hides the List of courses.
+We can use this hidden as property of html attributes.
+<div [hidden]="couses.length==0">
+    List of courses
+</div>
+
+The above thing will hide the div based on the condition.
+
+ngSwitchCase:
+If multiple tabs required ngIf cant be used.
+
+Concept of Gen Code:
+ul.nav.nav-pills and tab creates:
+<ul class="nav nav-pills"></ul>
+(li>a)*2 and tab creates:
+<li><a href=""></a></li>
+ <li><a href=""></a></li>
+
+Example:
+ <ul class="nav nav-pills">
+    <li [class.acticve]="viewMode=='map'"><a (click)="viewMode='map'">Map view</a></li>
+    <li [class.active]="viewMode=='list'"><a (click)="viewMode='list'">List View</a></li>
+</ul>
+<div [ngSwitch]="viewMode">
+    <div *ngSwitchCase="'map'">Map View Content</div>
+    <div *ngSwitchCase="'list'">List view content</div>
+    <div *ngSwitchDefault>Others</div>
+</div>
+
+declare viewMode attribute in component ts file and set it to map or list.
+
+ngFor: ***imp
+
+If you want to have a loop of html elements we use nFor.
+
+Angular detects change detetcion automatically in DOM after any changes.
+
+for an array:
+to push object:
+this.arrayname.push({paramlist with values});
+to delete object:
+let index= thois.arrayname.indexOf(objectname); //returns index of that object underlying in that array
+this.arrayname.splice(index, 1);
+
+ngFor and trackBy:
+If any data is binded to a button click, on every button click even if the data obtained is same angular relaoads the contents 
+wasting more memory. 
+
+To stop this if the data is same every time, we use trackBy keyword as below:
+in app component class:
+courses;
+loadCourses(){
+    this.courses=[
+        {id:1, name:course1},
+        {id:2, name:course2},
+        {id:3, name:course3},
+    ];
+}
+
+in app html:
+<button (click)="loadCourses()">Load</button>
+<ul>
+    <li *ngFor="let course of courses">
+        {{course.name}}
+    </li>
+<ul>
+
+The above code loads courses every time on button Load click. We have this ability to modify how
+angular tracks objects.
+
+modify <li *ngFor="let course of courses; trackBy : trackCourse">
+Note that trackCourse is a function but here we dont use paranthesis in trackBy
+add trackCourse in app component ts:
+trackCourse(index, course){
+    return course ? course.id : undefined;
+}
+Here angular tracks courses with course id, so it wont re-render the same stuff again and again.
+
+Leading Asterik *:
+if we use *ngIf angular rewrites the div using ng-template and use [ngIf] property binding:
+
+<div *ngIf="courses.length>0, else noCouses">
+    list
+</div>
+<ng-template>
+    No courses
+</ng-template>
+rewritten by angular as:
+<ng-template [ngIf]="courses.length >0">
+    <div>
+        List
+    </div>
+</ng-template>
+<ng-template [ngIf]="!(courses.length >0)">
+    <div>
+        List
+    </div>
+</ng-template>
+
+using * reduces our work to write more code.
+
+
+ng Class:
+Its an attribute directive, it will modify an attribute of existing dom element.
+
+If there is a need to add more than one class (Class Binding concpet) to any html attribute its better to use ngClass.
+Example:
+
+<span>
+    class="glyphicon"
+    [class.glyphicon-star]="isSelected
+    [class.glyphicon-star-empty]="!isSelected"
+    (click)="onClick()"
+    ></span>
+
+Above code can be written using ngClass key value format:
+
+<span>
+    class="glyphicon"
+    [ngClass]="{
+        'glyphicon-star':isSelected,
+        'glyphicon-star-empty':!isSelected, //note that the key always should be in quotes.
+    }"
+    (click)="onClick()"
+    ></span>
+
+ngStyle:
+Similar to ngClass but here it eliminates multiple lines of style binding using ngStyle Attribute directive.
+
+
+<button
+    [style.backgroundColor]="cansave ? 'blue': 'gray'"
+    [style.color]="cansave ? 'white' : 'green'"
+>Save
+</button>
+
+is repalced as:
+[ngStyle]="{
+    'backgroundColor': cansave ? 'blue': 'gray',
+    'color': cansave ? 'white': 'green'
+}"
+
+Safe Traversal Operator:
+? -  is symbol.
+Example:
+<span>{[ task.assignee?.name }}]}</span>
+The above state indicates to check if there is assignee object in task and if its null ignore, else render name of assignee.
+We can use ngIf to acheive this condition but safe traversal operator reduces code.
+
+Creating custom directives: **imp
+We can create directives just like components and services from angular cli
+ng g d input_format (input-format is directive name created)
+The created directive has its selector in [], means we can apply this directive on any html element and we can get that directive action applied over it.
+Add HostListener in import of directives ts file. HostListener is a decorator that links html dom with the directive functions.
+
+.Note: 'ElelemetRef' is an angular service that gives us access to the DOM objects. Its available in angular/core.
+Here we use nativeElement property of the ElelemetRef because it gives the access of actual dom object.
+-------------------------------------------------------------------------------
+
+Templates-----------------
+
+bootstrap form:
+In angular for bootstrap form the div should has class form-group and the input fields like input, text arer etc should include bootstrap class called
+form-control.
+
+FormControl provides us with help in validtions for input feilds:
+it gives us the value, touched/untouched status, dirty (value changed), pristine(Value is not changed), valid, errors.
+
+FormGroup contains a group of form controls.
+we get all validtion errors easily with help of Form Group instead of creating one validation object for each form input.
+
+Creating Controls:
+
+Using Directives : Template Driven Forms. This way we apply some directives in template. This way angular creates control objects implicitly for us underhood.
+Using Code: Reactive Forms. Explicitly creating control objects. In components we need to write code of new instances of control objects.
+
+Advtages of Reactive forms: More control over validation logic, Good for Complex forms, Unit testable
+Advantages of template driven forms: Good for simple forms, simple validation, Less code and easier to create.
+
+ngModel: different approach than two way binding.
+(example of validation through template driven form)
+Everytime you define ngModel on any input control, its mandatory to give name for that input in html. This is to
+distinguish various form control objects.
+Ex:  <input ngModel name="firstName" id="firstName" type="text" class="form-control">
+To pass a reference to ngModel directive, we can create a template variable like #firstName="ngModel" in input tag along with name and id.
+
+Adding validation in Template driven form:
+<input required ngModel name="firstName" #firstName="ngModel" (change)="log(firstName)" id="firstName" type="text" class="form-control">
+<div class="alert alert-danger"*ngIf="firstName.touched && !firstName.valid" >First Name Required.</div>
+
+We add validation errors as above. Next to each input feild in a div.
+
+Different kinds of validation errors:
+Built in validators in Angular(using html5 attributes)- minlength="", maxlength="", pattern=""(using pattern we can set regular expression validation).
+
+Use errors object of the ngModel to get values dynamically to showcase to the user like minlength.requiredLength
+
+Border the lining of input in red if validation error occurs:
+.form-control.ng-touched.ng-invalid{
+    border: 2px solid red;
+}
+
+Add above code in styles.css
+
+Cleaner templates: Better to use 1 attribute in 1 line.
+
+ngForm: similar to ngModel. but ngForm is applied on FormGroup.
+form: not([ngNoFrom]) or not[formGroup] selectors i.e, if a form dont contain these attributes then angularby default
+applies [ngForm] directive.
+Create a template variable with reference for ngForm directive.
+ngSubmit is output property of ngForm. It is used for eventbinding expressions.
+
+Value object of ngForm attribute is a json representation of form. ie., it holds values of all input elements in the form group. We can send this to api's.
+
+ngModelGroup:
+There are multiple groups in complex forms. In complex forms, in value object of ngForm directive we might get different objects instead of only attributes.
+ngModelGroup will provide us the subproperty of ngForm objects.
+
+ngModel ----> FormControl (one input)
+ngModelGroup---> FormGroup (Sub Groups in a complex form)
+ngForm---> FormGroup (Entire form as a whole)
+
+ngModelGroup doesnt have submit property like ngForm. (Major difference) Becuase it doesnt make sense to submit a part of form.
+
+Disabling and enabling the button based on valid state of form:
+Use property binding to bind the disabled property of button based on value of valid attrbute of ngForm state.
+Go to angular.io to see various properties of buttons and other html elements.
+
+Checkboxes in form:
+<div class="checkbox">
+        <label>
+            <input type="checkbox" ngModel name="isSubscribed">Subscribe to mail
+        </label>
+</div>
+
+Get value of form object in json:
+<p>
+{{f.value | json}}
+</p>
+
+f is template variable of ngForm directive.
+
+Adding Dropdown list to the form:
+<div class="form-group">
+        <label for="contactMethod">Contact Method</label>
+        <select ngModel name="contactMethod"  id="contactMethod" class="form-control">
+            <option value=""></option>
+            <option *ngFor="let method of contactMethods" [value]="method.id">{{method.name}}</option>
+        </select>
+ </div>
+
+ in ts file:
+ contactMethods= [
+    {id:1, name: 'email'},
+    {id:2, name: 'Phone'},
+    {id:3, name: 'Text'},
+  ];
+
+
+ In above drop down if we want to bind the whole object instead of value we use [ngValue]="method" instead of [value] property.
+             <option *ngFor="let method of contactMethods" [ngValue]="method">{{method.name}}</option>
+
+For selecting multiple options, we can use the multiple attribute in select tag of html.
+
+RadioButtons:
+<div class="radio">
+    <label>
+        <input type="radio" name="contactMethod" value="1">
+        Email
+    </label>
+</div>
+//Above is hardcoding of radiobuttons.
+
+Use *ngFor directive for binding data from component dynamically.
+<div *ngFor="let m of contactMethods" class="radio">
+        <label>
+        <input ngModel type="radio" name="contactMethod" [value]="m.id">
+        {{m.name}}
+    </label>
+</div>
+
+
+------------------------------------------------------------------------------------------------------------
+
+Reactive Forms:-------------------
+
+If you create a reactive form, the main purpose is to get input contorls dynamically from specific conditions.
+Dynamic forms are created by reactive forms. These help add validations asynchronously. Implement custom validation.
+
+Add Controls progrmatically:
+Create form control objects Explicitly through code.
+
+AbstractControl is base class for FormControl and FormGroup.
+
+[formGroup] directive is keyword for binding a reactive form object to html dom.
+FormControlName is directive is for binding reaactive form controls  to html dom.
+
+The above direticves are available in ReactiveFormsModule, so import it in imports of app module.
+
+Adding Validation:
+In template driven forms we built validation using html5 attributes, like Required, minLength, maxLength etc.
+We dont require them in html5 attributes.
+
+We add validators in FormControl syntax in ts file. In angular we had a class called validators. this class is defined in angular/forms.
+Validators has variety of static methods which we can use for our validation purpose, like email, minlength, required etc. 
+
+We use form.get('ObjectName').isValid to check if form control is valid or not. (See example)
+
+<div *ngIf="username.touched && username.invalid" clas="alert alert-danger">Username is Required</div>
+
+Multiple validators:
+We can add them in validators array.
+
+Custom Validators:
+validatorFn - Interface
+
+interfacce validatorFn{
+    (c: AbstractControl) : ValidationErrors | null
+}
+
+Above is syntax of that interface. Any function matches the signature above is a validator function.
+
+Better create a seperate ts file for creating custom validators for a form control.
+
+import { AbstractControl, ValidationErrors } from '@angular/forms';
+
+export class UserNameValidators{
+     
+    //adding cannotContainSpace custom validator, here it is a static function
+   static cannotContainSpace (control: AbstractControl): ValidationErrors | null {
+        if((control.value as string).indexOf(' ') >= 0) //ValidationErrors in a complex object
+            return { cannotContainSpace : true}
+
+        return null;
+
+        //complex object validator return statement
+        // return{
+        //     minLenghth : {
+        //         requiredLength: 3,
+        //         ActualLength: control.value.length
+        //     }}
+        }
+    }
+}
+
+We can keep common custom validators in a common place so that all the components can use them.
+
+Asynchronous Operations and Validators:
+There are times we call the server to validate a given value.
+Ex: To check if a username is taken or not.
+
+Asynchronous means non blocking. Running operations in behind and made available to user when they are ready after execution.
+Ex: AJAX, Timer functions .
+
+SetTimeOut( action ,timeoutvalue ); is an example for asynchronous function.
+
+Return type will be different for AsyncValidatorFn. Check interface of AsyncValidatorFn in angular.io
+
+It returns Promise or Observable objects. Observable is used when we connect to a server. For simple cases we use promise.
+
+Async Validator Func' Promise object uses resolve and reject objects to return something. See the example here:
+
+static shouldBeUnique(control: AbstractControl) : Promise <ValidationErrors | null> {
+        return new Promise((resolve, reject)=> {
+            setTimeout(()=> {
+                if(control.value === "mosh")
+                    resolve({ shouldBeUnique : true});
+                else
+                    resolve(null);
+            }, 2000);
+        });
+    }
+This above function shows us error after 2 seconds. As timeout is 2000 ms.
+Here we used revoke to return some error to the consumer of this promise.
+
+
+Loader image when using Async validation:
+As async validation tooks some time, its better to have a loader image beside the formcontrol which is under validation.
+Use property 'pending' of validators to apply this image.
+Ex: <div *ngIf="username.pending">Checking for uniqueness...</div>
+
+Validating a form up on button Submit:
+Use event binding expression to bind a method to form submit, use a div to display error message.
+<form [formGroup]="form" (ngSubmit)="login()">
+<div *ngIf="form.errors" class="alert alert-danger"> Invalid Login </div>
+Add this login() in the ts file. Here we generally call the server to see if username and pwd are valid or not.
+login(){
+ let isValid =  authService.login(this.form.value);
+ if(!isValid)
+ {
+     this.username.setErrors({
+         invalidUsername : true
+     }); //individual form control validation
+     this.form.setErrors({
+         invalidLogin : true
+     }); //for all form controls as a whole
+ }
+}
+
+Nested Form Groups:--
+Just like we created FormControls under a FormGroup, we can create FormGroups under a FormGroup. Its essential for building complex forms.
+form=new FormGroup({
+    'account': new FormGroup({
+      'username': new FormControl('', 
+    [
+      Validators.required,
+      Validators.minLength(3),
+     UserNameValidators.cannotContainSpace
+    ],
+    UserNameValidators.shouldBeUnique),
+    'password': new FormControl('',Validators.required)
+ })
+
+ Also nest the form controls under a div which has  formGroupName. Ex:  <div formGroupName="account">
+
+ Form Array:---
+ FormArray is also a class inherited from AbstractControl. The main purpose of formArray is to have list of elements of a form that can be represented as a form array.]
+ See new-course-component for example for simple explanation.
+
+ FormBuilder:
+ In Angular we have a cleaner way of creating formcontrols and formgroups using reactive appraoch. For that we need to inject a FormBuilder object through constructor
+ of the component.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Consuming HTTP Services:
+
+How to connect to backend services or API's
+
+To know how to built http services we need to see another lecture. Its job of a backend or full stack developer.
+https://jsonplaceholder.typicode.com/ 
+Now we use a fake http service in above address.
+
+CRUD:
+
+Getting code from posts:
+To consume http services we need to import a new module: HttpModule in imports of app module. (available in angular/http)
+
+HTTPModule has Providers that are necessary for all dependency injections needed for http actions. So no need to add providers again once you import
+the module its fine.
+
+We use http.get() method and chain the subscribe() method to get the server objects. Here get() will be asynchronous which means it work with
+promise and Observable, the reason is there will be a certain time delay when the data gets loaded from server.
+
+So we use subscribe function ( can be over loaded in 5 ways) which makes the data available when it is available. We use respone arrow function and define the posts into a json objects using
+response.json(). Now we can render all these posts in html.
+
+
+Creating Data:
+See the example. We need a keyup event to enter some text and add it to the server and retreive back from json object and show the same info on the screen.
+
+HttpRequests: GET - to get data, POST - to create data, PUT - to update data, DELETE - to delete data
+
+Use JSON.stringify(postobject) as body parameter in post method.
+
+We use push method to push any object in a list, but it apperas at last row. We use splice method to keep list in firts row with out deleting any objects of the list.
+
+Update data:
+We can use this.http.put to update data. Also we can use this.http.patch method.  we use Patch method to update only a few properties in a object.
+Ex:
+this.http.patch(this.url, JSON.stringify({ isRead: true }))
+this.http.put(this.url, JSON.stringify(post))
+
+For every http method we need to subscribe as these are asynchronous.
+
+Delete Data: 
+Call the this.http.delete method.
+It has no body argument, but id should be passed along with the url.
+Use splice method to remove the concerned data from the view.
+
+OnInit Interface:
+As a good practice the constructors should be light weight.
+Lifecycle hooks of a component: When angulalr 1.Creates a component, 2. Renders, 3. Creates and renders its children, 4. Destroy a component
+
+ngOnInit is the method called when we initializes our component.
+
+Like OnInit we have many interfaces which are called at particular life cycle hook of a component.
+Ex: OnChanges, DoCheck, AfterContentInit etc. All these interfaces will have method name with same interface name with ng as prefix before them. like ngOnChanges()
+
+Donot call http methods inside a constructor better do it in OnInit.
+
+Seperation of concerns principle:
+A class which does too many things violates the seperation of concern principle. A class should do only one thing it is meant for.
+
+To resolve this we create another class known as a service; Component <---> Service <---> Backend. We can resuse these services. Also, we can run 1000's of unit tests without
+impacting the real code, by creating a fake implementation to the service.
+
+Extracting a service:
+ng g s service_name : use this command to create service. Add this service in providers of app module.
+Better creaate seperate folder for servies.
+
+So, in cmd, cd src/app
+            mkdir services
+            mv post.services.* services
+post service is now moved to services folder.
+
+see the example in the solution for detailed illustration.
+
+Handling Errors:
+--
+In reality a call to the service can give you some errors and you need to handle them.
+generally errors of a service are of two types: unexpected and expected
+Unexpected: server is offline, network down, unhandled exceptions.
+Expected:  404 Not found, 400 bad requests
+404 ex: a user deletes some data, b user also wants to delete that data. Server throws 404 as its nott there due to the fact that its already deleted.
+400 ex: a new user is trying to create with existing username. server throws 400 error.
+
+200 mens success ok.
+
+Handling unexpected errors:
+
+Its better to use a toast notification instead of alert. They dont freeze the browser, automaatically disappear after 5 seconds. more user friendly.
+Use error function in subscribe method to handle unexpected errors.
+
+Handling Expected errors:
+Note- In arrow functions when we use type annotation we need to put them in paranthesis.
+(error : Respone) =>{} here we can get error.status (intellisense) to check the status if 404 or 400.
+
+Throwing application specific errors:
+Adding error: Respone in components voilate the property of seperation of concerns. So we need to catch the http errors in the service itself.
+
+Add import 'rxjs/add/operator/catch' in the servcie. Due to this, we caan have .catch on delete,post,put etc http methods.
+
+(GIT>Add REMOTE and paste the url. And push the changes.)
