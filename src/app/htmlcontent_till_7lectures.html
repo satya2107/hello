@@ -1,0 +1,46 @@
+<contact-form></contact-form>
+<br/>
+<br/>
+<br/>
+<h1>Angular</h1>
+<favorite [isFavorite]="post.isFavorite"></favorite>
+<br/>
+<br/>
+<bootstrap-panel>
+    <div class="card-title">Heading</div>
+    <div class="card-body">
+        <h1>Body</h1>
+        <p>some content...</p>
+    </div>
+    
+</bootstrap-panel>
+<ul class="nav nav-pills">
+    <li [class.acticve]="viewMode=='map'"><a (click)="viewMode='map'">Map view</a></li>
+    <li [class.active]="viewMode=='list'"><a (click)="viewMode='list'">List View</a></li>
+</ul>
+<div [ngSwitch]="viewMode">
+    <div *ngSwitchCase="'map'">Map View Content</div>
+    <div *ngSwitchCase="'list'">List view content</div>
+    <div *ngSwitchDefault>Others</div>
+</div>
+<br/>
+<br/>
+<button class="btn-primary" (click)="onAdd()">Add</button>
+<ul>
+    <li *ngFor="let course of courses; index as i; even as ifEven">
+        {{i}} - {{course.name}} <span *ngIf="ifEven">(Even)</span>
+        <button class="btn-secondary" (click)="onRemove(course)">Remove</button>
+    </li>
+</ul>
+
+<button
+    [style.backgroundColor]="cansave ? 'blue': 'gray'"
+    [style.color]="cansave ? 'white' : 'green'"
+    [style.fontWeight]="cansave ? 'bold' : 'normal'"
+>Save
+</button>
+<br/><br/>
+<span>{{task.assignee?.name}}</span>
+<br/><br/><br/><br/>
+<input type="text" appInputFormat [format]="'upper'"> 
+<!-- custom directive with property binding concept -->

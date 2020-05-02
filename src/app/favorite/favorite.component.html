@@ -1,0 +1,6 @@
+<button type="button" class="btn"
+[class.btn-primary] = "isFavorite"
+[style.backgroundColor]="isFavorite ? 'Green' : 'Black'"
+[class.btn-secondary] = "!isFavorite"
+(click) = "onClick()"
+>Primary</button>
