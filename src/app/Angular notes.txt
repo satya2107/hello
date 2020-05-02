@@ -767,6 +767,59 @@ Note- In arrow functions when we use type annotation we need to put them in para
 Throwing application specific errors:
 Adding error: Respone in components voilate the property of seperation of concerns. So we need to catch the http errors in the service itself.
 
-Add import 'rxjs/add/operator/catch' in the servcie. Due to this, we caan have .catch on delete,post,put etc http methods.
+Add import 'rxjs/add/operator/catch' in the servcie. Due to this, we caan have .catch on delete,post,put etc http methods. (After angular 5 this catch is deprecated.)
+Add import { Observable } from 'rxjs/'Observable in the service ts file.
 
-(GIT>Add REMOTE and paste the url. And push the changes.)
+Instead of catch, angualr introduced .pipe ( catchError{}) which serves the same functionality of throwing application specific errors.
+-----------
+With RxJS 5.5+, the catch operator is now deprecated. You should now use the catchError operator in conjunction with pipe.
+RxJS v5.5.2 is the default dependency version for Angular 5.
+
+For each RxJS Operator you import, including catchError you should now import from 'rxjs/operators' and use the pipe operator.
+
+Example of catching error for an Http request Observable
+import { Observable } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+...
+
+export class ExampleClass {
+  constructor(private http: HttpClient) {
+    this.http.request(method, url, options).pipe(
+      catchError((err: HttpErrorResponse) => {
+        ...
+      }
+    )
+  }
+  ...
+}
+Notice here that catch is replaced with catchError and the pipe operator is used to compose the operators in similar manner to what you're used to with dot-chaining.
+--------------
+User throwError() instead of Observable.throw()
+(GIT>Add REMOTE and paste the url. And push the changes.) --Note
+
+Importing factory methods of Observable class. - old topic. From angular 6 this has been changed.
+
+Global error handling:---
+Create a error handler class file. See angular.io where we have ErrorHandler class. Built in class.
+This ErrorHandler class implements built in class handleError(error : any){} which we use to catch unexpected errors globaly.
+
+For doing this, we need to register this new user defined ErrorHandler class in providers list of app module ts with the below syntax:
+{ provide : ErrorHandler, useClass : AppErrorHandler} //here AppErrorHandler is user created error handler for the application.
+We are just saying the compiler that whatever the actions performed by ErrorHandler will be now performed by AppErrorHandler (name alias kind of thing for the project global error handler).
+
+Now we need not handle unexpected errors in component file, instead we will rethrow them so that our global error handler class will be hit and it will handle errors for us.
+
+Extracting a reusable ErrorHandler method:--
+Refactorize the code where ever it can be. Use user defined functions inside a service and call that function as a reference to handle error. See the example built.
+
+Reusable Data Service:---
+In real world application, we have 10's of services instead of one.
+We can create a common service and we can extends from this service to avoid coding repetetive stuff.
+See the example where we create a DataService and the PostService extends the DataService. We can use this DataService for creating various like services.
+
+As we use extends, for calling base class constructor inside the dervided class constructor we use super key word.
+constructor(){ //dervided class constructor
+    super()//calling base class constructor
+}
+
+Note that Injetcable() should not be there in DataService as its base class and not deriving from any other class.

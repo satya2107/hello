@@ -1,7 +1,9 @@
+import { DataService } from './services/data.service';
+import { AppErrorHandler } from './common/validators/app-error-handler';
 import { SummaryPipe } from './summary.pipe';
 import { CoursesService } from './course/courses.service';
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { NgModule, ErrorHandler } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -39,7 +41,8 @@ import { PostService } from './services/post.service';
   ],
   providers: [
     CoursesService,
-    PostService
+    PostService,
+    {provide : ErrorHandler, useClass : AppErrorHandler}
   ],
   bootstrap: [AppComponent, FavoriteComponent, BootstrapPanelComponent]
 })
