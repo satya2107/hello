@@ -825,3 +825,37 @@ constructor(){ //dervided class constructor
 Note that Injetcable() should not be there in DataService as its base class and not deriving from any other class.
 
 Cloned git repo in my lenovo laptop
+
+Map Operator:
+Generally in component we dont want to deal with the Response object anymore. Its used only in a service ts.
+Map operator is one kind of Observable operator. Map will get the response from observable and tranform it to a array of objects.
+
+From rxjs 5.5 onwards, you can use the pipeable operators
+import { map } from 'rxjs/operators';
+What is wrong with the import 'rxjs/add/operator/map';
+
+When we use this approach map operator will be patched to observable.prototype and becomes a part of this object.
+If later on, you decide to remove map operator from the code that handles the observable stream but fail to remove the corresponding import statement, the code that implements map remains a part of the Observable.prototype.
+
+When the bundlers tries to eliminate the unused code (a.k.a. tree shaking), they may decide to keep the code of the map operator in the Observable even though it’s not being used in the application.
+
+Solution - Pipeable operators
+Pipeable operators are pure functions and do not patch the Observable. You can import operators using the ES6 import syntax import { map } from "rxjs/operators" and then wrap them into a function pipe() that takes a variable number of parameters, i.e. chainable operators.
+Something like this:
+
+getHalls() {
+    return this.http.get(HallService.PATH + 'hall.json')
+    .pipe(
+        map((res: Response) => res.json())
+    );
+}
+
+
+Optimistic vs Pessismistic Updates:
+Optimistic- We add the changes on UI first to show the user, makes him beleive that most of the time the call to the
+server wont fail. If call to the server fails, we will roll back the changes done in UI.
+
+Pessismistic: wait for slight delay to make sure that call to the server is success and then modify the UI for the user.
+
+Until now in the example, we implemented Pessismistic update. Now we see the Optimistic update.
+

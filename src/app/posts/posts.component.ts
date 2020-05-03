@@ -18,9 +18,7 @@ export class PostsComponent implements OnInit {
 
   ngOnInit(): void {
     this.service.getAll()
-      .subscribe(response =>{
-        this.posts= response.json();
-      });
+      .subscribe(posts => this.posts= posts);
       // error => {
       //   alert('unexpected error')
       //   console.log(error)
@@ -31,8 +29,8 @@ export class PostsComponent implements OnInit {
     inputTitle.value ='';
     this.service.create(post)
       .subscribe( 
-        response => {
-        post['id']= response.json().id; // if we dont keep id in square bracs it will throw error as we defined only title attribute for post object.
+        newPost => {
+        post['id']= newPost.id; // if we dont keep id in square bracs it will throw error as we defined only title attribute for post object.
         this.posts.splice(0,0,post); 
       }, 
         (error : AppError) => {
@@ -50,8 +48,8 @@ export class PostsComponent implements OnInit {
   updatePost(post){
     this.service.update(post)
       .subscribe (
-        response =>{
-        console.log(response.json())
+        updatedPost =>{
+        console.log(updatedPost)
       }); 
         // error => {
         // alert('Unexpected error');
@@ -63,7 +61,7 @@ export class PostsComponent implements OnInit {
   deletePost(post){
     this.service.delete(345)
       .subscribe(
-        response => {
+        () => { //the empty paranthesis is due to the fact that deletePost will not return any object/response.
         let index = this.posts.indexOf(post); //finding the index of post
         this.posts.splice(index,1); //deleting using splice method.
       }, 
