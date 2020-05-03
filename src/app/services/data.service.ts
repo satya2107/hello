@@ -30,6 +30,10 @@ export class DataService {
       );
   }
 
+  createOptimistic(resource){
+    return throwError(new AppError())
+  }
+
   update(resource){
   return  this.http.patch(this.url + '/' + resource.id , JSON.stringify( { isRead: true }))
               .pipe(
@@ -48,6 +52,10 @@ export class DataService {
             .pipe( 
             catchError(this.handleError)
             );
+   }
+
+   deleteOptimistic(id){
+     return throwError(new AppError())
    }
 
    private handleError(error: Response){

@@ -859,3 +859,38 @@ Pessismistic: wait for slight delay to make sure that call to the server is succ
 
 Until now in the example, we implemented Pessismistic update. Now we see the Optimistic update.
 
+Observables vs Promises:---
+Asynchronous operatons.
+With observables, the backend service operation will not be called unless we subscribe the service method.
+
+Observables are lazy, nothing happens unless you subscribe to them.
+Promises are eager, as soon as you call one the promise is executed.
+
+To conevert an observable to promise we use toPromise operator in rxjs operators library. 
+Note that promises dont have a subscribe method. Here we have 1.then() for getting a result and 2.catch() for handling errors.
+But promises are called even without using then method. This is nature of them their eagerness.
+
+Reactive progamming: the reactive library or rxjs library is where we get Observable and its operators which help us
+in minification of writing code.
+EX: .retry(count) is a method we can use with observable which retries the hit to the server for count times. Without this property we
+need to write a for loop which is tidy.
+
+With observables we get powerful set of operators which wont come with promise. But to use these operators with observable we need the subscribe in executing function.
+
+Key notes: Remember we can always convert an observable to promise, but prefer observables becuase they allow reactive programming.
+Observables are lazy, nothing happens until you subscribe them. 
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+Routing & Navigation---------------
+------------------------------------------------------------------------------------------------------------------------------------------------------
+Just like forms, reactiveforms, http modules
+We have router module where we have a bunch of predefined directives and services.
+
+Steps: 1. Configure routes ( A route is mapping of a path to a component)
+    2. Add a router outlet (Where we display a corresponding component when a given component becomes active)
+    3. Add links.
+
+
+
+
